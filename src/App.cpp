@@ -1,5 +1,4 @@
 #include "App.hpp"
-#include <iostream>
 
 App::App() {
     this->engine = Engine();

@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include <iostream>
 /*
 This is a singleton object which represents the Application. Currently it
 only initializes and maintains a pointer to an Engine object, however in
