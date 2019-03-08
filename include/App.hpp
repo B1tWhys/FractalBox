@@ -1,3 +1,4 @@
+#include "Engine.hpp"
 /*
 This is a singleton object which represents the Application. Currently it
 only initializes and maintains a pointer to an Engine object, however in
@@ -16,4 +17,5 @@ class App {
         void run();
     private:
         App();
+        Engine engine;
 };
