@@ -1,8 +1,6 @@
 #include "App.hpp"
 
-App::App() {
-    this->engine = Engine();
-}
+App::App() {}
 
 App &App::getInstance() {
     static App instance;

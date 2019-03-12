@@ -1,31 +1,47 @@
 #include "Fractal.hpp"
+#include <iostream>
 #include <fstream>
+#include <string>
 
 Fractal::Fractal() {
     this->name = "Mandelbrot";
     this->vertShader = this->compileFragShaderFromSrc("../shaders/triangle.vert", GL_VERTEX_SHADER);
     this->fragShader = this->compileFragShaderFromSrc("../shaders/mandelbrot.frag", GL_FRAGMENT_SHADER);
+    // this->fragShader = this->compileFragShaderFromSrc("../shaders/test.frag", GL_FRAGMENT_SHADER);
 }
 
 unsigned int Fractal::compileFragShaderFromSrc(const char *fname, GLenum shaderType) {
-    std::ifstream shaderSrcFile;// TODO fix the shit out of this
-    std::string name = (shaderType ==  GL_VERTEX_SHADER) ? "../shaders/triangle.vert" : "../shaders/mandelbrot.frag";
-
-    shaderSrcFile.open(name, std::ifstream::ate); 
-
-    size_t size = shaderSrcFile.tellg();
-    shaderSrcFile.seekg(0, shaderSrcFile.beg);
-    GLchar *shaderSrc = static_cast<GLchar *>(malloc(size));
-    shaderSrcFile.read(shaderSrc, size);
-    shaderSrcFile.close();
-
-    unsigned int shader = glCreateShader(shaderType);
-    glShaderSource(shader, 1, &shaderSrc, NULL);
-    glCompileShader(shader);
-    delete[] shaderSrc;
-
-    return shader;
+    std::fstream shaderSrcFile;
+    shaderSrcFile.open(fname, std::fstream::in | std::ifstream::ate);// TODO make the file names not be hard coded
+    if (!shaderSrcFile.is_open()) {
+        throw std::runtime_error("Failed to open shader source file");
+    }
 
     
-    return -1;
+    int size = shaderSrcFile.tellg();
+    shaderSrcFile.seekg(0, shaderSrcFile.beg);
+    std::string shaderSrc(size, ' ');
+    shaderSrcFile.read(&shaderSrc[0], size);
+
+    const GLchar *srcCStr = (const GLchar *)shaderSrc.c_str();
+
+    unsigned int shader = glCreateShader(shaderType);
+    glShaderSource(shader, 1, &srcCStr, NULL);
+    glCompileShader(shader);
+
+    int success;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        int logSize;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
+        char *log = new char[logSize];
+        glGetShaderInfoLog(shader, logSize, NULL, log);
+        std::cerr << "Failed to compile shader." << log;
+        throw;
+    }
+
+    shaderSrcFile.close();
+    // delete[] shaderSrc;
+
+    return shader;
 }

@@ -7,7 +7,7 @@
 
 class Engine {
     public:
-        Fractal fractal;
+        Fractal *fractal;
 
         Engine();
         void run();
@@ -21,6 +21,7 @@ class Engine {
         void initOpengl();
         void initBuffers();
         void initPipeline();
+        void cleanup();
 
         void mainLoop();
         

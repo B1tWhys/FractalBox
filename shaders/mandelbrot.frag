@@ -10,6 +10,7 @@ struct MandelbrotDomain {
 uniform dvec2 screenSize;
 uniform MandelbrotDomain domain;
 
+in vec4 gl_FragCoord;
 out vec4 FragColor;
 
 float f(float n, float H, float S, float L) {
@@ -27,15 +28,10 @@ float f(float n, float H, float S, float L) {
 }
 
 void main() {
-    // float x0 = 3.5 * gl_FragCoord.x / screenSize.x - 2.5;
-    // float y0 = domain.height * gl_FragCoord.y / screenSize.y + domain.yOffset;
-    // float x0 = domain.width * gl_FragCoord.x / screenSize.x + domain.xOffset;
-    // float y0 = domain.height * gl_FragCoord.y / screenSize.y + domain.yOffset;
-    // float x = 0.0;
-    // float y = 0.0;
-    // float xTmp = 0;
-    double x0 = domain.width * gl_FragCoord.x / screenSize.x + domain.xOffset;
-    double y0 = domain.height * gl_FragCoord.y / screenSize.y + domain.yOffset;
+    // double x0 = domain.width * gl_FragCoord.x / screenSize.x + domain.xOffset;
+    // double y0 = domain.height * gl_FragCoord.y / screenSize.y + domain.yOffset;
+    double x0 = 3.5 * gl_FragCoord.x / 1920 - 2.5;
+    double y0 = 2.0 * gl_FragCoord.y / 1080 - 1;
     double x = 0.0;
     double y = 0.0;
     double xTmp = 0;
@@ -63,17 +59,9 @@ void main() {
     float S = 1 - ratio;
     float L = ratio;
 
-
-    // float r = sqrt(ratio);
-    // float g = pow(ratio, 1.0f/3.0f);
-    // float b = pow(ratio, 1.0f/4.0f);;
     float r = f(0f, H, S, L);
     float g = f(8f, H, S, L);
     float b = f(4f, H, S, L);
 
     FragColor = vec4(r, g, b, 1.0f);
-
-    // float c;
-    // c = domain.xOffset;
-    // FragColor = vec4(c, c, c, 1.0f);
 }

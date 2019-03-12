@@ -11,9 +11,13 @@ float vertices[] = {
     -1.0f, -3.0, 0.0f
 };
 
-Engine::Engine() {
-    this->fractal = Fractal();
-}
+// float vertices[] = {
+//     -0.5f, -0.5f, 0.0f,
+//      0.5f, -0.5f, 0.0f,
+//      0.0f,  0.5f, 0.0f
+// };
+
+Engine::Engine() {}
 
 void Engine::run() {
     initWindow();
@@ -28,10 +32,10 @@ void Engine::initWindow() {
         throw std::runtime_error("Failed to initialize glfw");
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
+    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // maybe change this to disable FPS cap?
 
     this->window = glfwCreateWindow(WIDTH, HEIGHT, "Fractal Box", NULL, NULL);
@@ -69,9 +73,10 @@ void Engine::initBuffers() {
 }
 
 void Engine::initPipeline() {
-    unsigned int vertexShader = this->fractal.vertShader;
+    this->fractal = new Fractal();
+    unsigned int vertexShader = this->fractal->vertShader;
     int success;
-    char infoLog[1000];
+    char infoLog[1025];
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexShader, 1024, NULL, infoLog);
@@ -79,23 +84,26 @@ void Engine::initPipeline() {
         throw std::runtime_error("Failed to compile vertex shader");
     }
 
-    unsigned int fragmentShader = this->fractal.vertShader;
+    unsigned int fragmentShader = this->fractal->fragShader;
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success) {
         glGetShaderInfoLog(vertexShader, 1024, NULL, infoLog);
-        printf("Fragment shader compilation error: %s\n", infoLog);
-        throw std::runtime_error("Failed to compile fragment shader");
+        // printf("Fragment shader compilation error: %s\n", infoLog);
+        std::cerr << "Fragment shader compilation error: " << infoLog << std::endl;
+        // throw std::runtime_error("Failed to compile fragment shader");
     }
 
     this->shaderProgram = glCreateProgram();
     glAttachShader(this->shaderProgram, vertexShader);
     glAttachShader(this->shaderProgram, fragmentShader);
     glLinkProgram(this->shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    glGetProgramiv(this->shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(this->shaderProgram, 1024, NULL, infoLog);
         printf("Shader program linking error: %s\n", infoLog);
         throw std::runtime_error("Failed to link shader program");
+    } else {
+        printf("Pipeline assembled\n");
     }
 
     glDeleteShader(vertexShader);
@@ -104,14 +112,21 @@ void Engine::initPipeline() {
 
 void Engine::mainLoop() {
     while (!glfwWindowShouldClose(window)) {
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         glUseProgram(this->shaderProgram);
         glBindVertexArray(this->VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        
+
         glfwSwapBuffers(window);
+        // glFinish();
         glfwPollEvents();
     }
 
+}
+void Engine::cleanup() {
+    glfwDestroyWindow(this->window);
     glfwTerminate();
 }
 
@@ -120,7 +135,6 @@ void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int acti
         glfwSetWindowShouldClose(keyWindow, GLFW_TRUE);
     }
 }
-
 
 void Engine::error_callback(int error, const char *description) {
     fprintf(stderr, "Error: %s\n", description);
