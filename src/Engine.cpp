@@ -11,12 +11,6 @@ float vertices[] = {
     -1.0f, -3.0, 0.0f
 };
 
-// float vertices[] = {
-//     -0.5f, -0.5f, 0.0f,
-//      0.5f, -0.5f, 0.0f,
-//      0.0f,  0.5f, 0.0f
-// };
-
 Engine::Engine() {}
 
 void Engine::run() {
@@ -33,9 +27,9 @@ void Engine::initWindow() {
     }
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // maybe change this to disable FPS cap?
 
     this->window = glfwCreateWindow(WIDTH, HEIGHT, "Fractal Box", NULL, NULL);
