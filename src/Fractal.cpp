@@ -17,7 +17,6 @@ unsigned int Fractal::compileFragShaderFromSrc(const char *fname, GLenum shaderT
         throw std::runtime_error("Failed to open shader source file");
     }
 
-    
     int size = shaderSrcFile.tellg();
     shaderSrcFile.seekg(0, shaderSrcFile.beg);
     std::string shaderSrc(size, ' ');

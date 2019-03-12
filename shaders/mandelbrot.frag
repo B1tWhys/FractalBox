@@ -1,4 +1,4 @@
-#version 460 core
+#version 410 core
 
 struct MandelbrotDomain {
     double xOffset;
@@ -14,8 +14,8 @@ in vec4 gl_FragCoord;
 out vec4 FragColor;
 
 float f(float n, float H, float S, float L) {
-    float k = n + H/30f;
-    k = k - floor(k/12f)*12f;
+    float k = n + H/30.0;
+    k = k - floor(k/12.0)*12.0;
     float a;
 
     if (L < 0.5) {
@@ -49,19 +49,19 @@ void main() {
     }
 
     if (iteration < max_iteration) {
-        nu = log(log(float(x * x + y * y)) / 2.0f / log(2f)) / log(2f);
+        nu = log(log(float(x * x + y * y)) / 2.0f / log(2.0)) / log(2.0);
         iteration = iteration + 1 - nu;
     }
     float ratio;
     ratio = pow(float(iteration/max_iteration), 1.0);
 
-    float H = 360f * ratio;
+    float H = 360.0 * ratio;
     float S = 1 - ratio;
     float L = ratio;
 
-    float r = f(0f, H, S, L);
-    float g = f(8f, H, S, L);
-    float b = f(4f, H, S, L);
+    float r = f(0.0, H, S, L);
+    float g = f(8.0, H, S, L);
+    float b = f(4.0, H, S, L);
 
-    FragColor = vec4(r, g, b, 1.0f);
+    FragColor = vec4(r, g, b, 1.0);
 }
