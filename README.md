@@ -4,7 +4,7 @@ Fractal box is a 3D ray-marched fractal render engine (similar to [Marble Marche
 ## Download
 To clone the project, `cd` to a directory where you want this thing, and then run 
 
-```git clone --recurse-submodules```
+```git clone --recurse-submodules https://github.com/Bouldersky/FractalBox.git```
 
 to pull down everything you need
 
