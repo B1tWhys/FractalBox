@@ -2,7 +2,6 @@
 #include <GLFW/glfw3.h>
 #include "Fractal.hpp"
 #include "Camera.hpp"
-#include <atomic>
 
 #pragma once
 
@@ -26,7 +25,7 @@ class Engine {
         unsigned int VBO; // Vertex buffer object
         unsigned int VAO; // Vertex array object
         Camera cam;
-        static std::atomic<bool> shouldReloadPipeline;
+        bool readMouse;
 
         void initWindow();
         void initOpengl();
@@ -36,6 +35,7 @@ class Engine {
         
         void mainLoop();
         void updateUniforms();
+        void updateRot();
         
         static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
         static void error_callback(int error, const char *description);

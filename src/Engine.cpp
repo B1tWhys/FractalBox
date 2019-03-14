@@ -13,8 +13,6 @@
 #define WIDTH 1920
 #define HEIGHT 1080
 
-std::atomic<bool> Engine::shouldReloadPipeline = false;
-
 float vertices[] = {
     -1.0f, 1.0f, 0.0f,
     3.0f, 1.0f, 0.0f,
@@ -26,6 +24,7 @@ Engine::Engine() {}
 void Engine::run() {
     initWindow();
     initOpengl();
+    this->readMouse = true;
     mainLoop();
 }
 
@@ -112,16 +111,13 @@ void Engine::initPipeline() {
 
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-
-    Engine::shouldReloadPipeline = false;
 };
 
 //TODO: make these adjustable at runtime
 #define MAXSTEPS 100
-#define MINDIST 0.000001
+#define MINDIST 0.0001
 void Engine::updateUniforms() {
     static bool firstUpdate = true;
-    if (firstUpdate) std::cout << glm::to_string(this->cam.camToWorldMat() * glm::vec4(0.25, 1, 0, 0)) << std::endl;
     firstUpdate = false;
 
     int screenSize_loc = glGetUniformLocation(shaderProgram, "screenSize");
@@ -153,7 +149,7 @@ void Engine::mainLoop() {
         glfwSwapBuffers(window);
         // glFinish();
         glfwPollEvents();
-        if (Engine::shouldReloadPipeline) this->initPipeline();
+        if (readMouse) updateRot();
     }
 }
 
@@ -162,28 +158,50 @@ void Engine::cleanup() {
     glfwTerminate();
 }
 
+void Engine::updateRot() {
+    double xpos, ypos;
+    glfwGetCursorPos(this->window, &xpos, &ypos);
+    glfwSetCursorPos(this->window, WIDTH/2, HEIGHT/2);
+
+    float delta_x, delta_y;
+    delta_x = xpos - WIDTH/2;
+    delta_y = ypos - HEIGHT/2;
+
+    this->cam.rotRight(delta_x/100);
+    this->cam.rotUp(delta_y/100);
+}
+
 void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int action, int mods) {
+    float speed = 0.02;
     Engine *engineP = &App::getInstance().engine;
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_ESCAPE||
             key == GLFW_KEY_Q) {
             glfwSetWindowShouldClose(keyWindow, GLFW_TRUE);
         } else if (key == GLFW_KEY_R) {
-            Engine::shouldReloadPipeline = true;
+            engineP->initPipeline();
         } else if (key == GLFW_KEY_W) {
-            engineP->cam.setYVel(-.01);
+            engineP->cam.setZVel(-speed);
         } else if (key == GLFW_KEY_A) {
-            engineP->cam.setXVel(.01);
+            engineP->cam.setXVel(-speed);
         } else if (key == GLFW_KEY_S) {
-            engineP->cam.setYVel(.01);
+            engineP->cam.setZVel(speed);
         } else if (key == GLFW_KEY_D) {
-            engineP->cam.setXVel(-.01);
+            engineP->cam.setXVel(speed);
+        } else if (key == GLFW_KEY_LEFT_CONTROL) {
+            engineP->cam.setYVel(-speed);
+        } else if (key == GLFW_KEY_SPACE) {
+            engineP->cam.setYVel(speed);
+        } else if (key == GLFW_KEY_E) {
+            engineP->readMouse = !engineP->readMouse;
         }
     } else if (action == GLFW_RELEASE) {
         if (key == GLFW_KEY_W || key == GLFW_KEY_S) {
-            engineP->cam.setYVel(0);
+            engineP->cam.setZVel(0);
         } else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
             engineP->cam.setXVel(0);
+        } else if (key == GLFW_KEY_SPACE || key == GLFW_KEY_LEFT_CONTROL) {
+            engineP->cam.setYVel(0);
         }
     }
 }
