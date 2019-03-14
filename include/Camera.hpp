@@ -17,6 +17,7 @@ class Camera {
     public:
         Camera();
         float fov;
+        glm::vec4 vel; // in camera space
 
         glm::vec4 getCamForward();
         glm::vec4 getCamRight();
@@ -38,9 +39,7 @@ class Camera {
         void stepTime();
     private:
         // glm::vec4 pos; // in world space
-        glm::vec4 vel; // in world space
 
-        // not actually sure that the world space <-> camera space direction is correct below...
         glm::mat4 R; // world space -> camera space rotation matrix
         glm::mat4 T; // world space -> camera space translation matrix
 

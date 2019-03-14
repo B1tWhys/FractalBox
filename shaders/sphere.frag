@@ -13,7 +13,15 @@ out vec4 FragColor;
 
 float DE(vec3 p) {
     float R = 0.5;
-    return (length(p) - R) * .06;
+    return (length(p) - R);
+}
+
+float floordist(vec3 p) {
+    return p.y;
+}
+
+float distanceEstimator(vec3 p) {
+    return min(DE(p), floordist(p));
 }
 
 // from = source of the ray (either a camera or the last ray bounce)
@@ -24,7 +32,7 @@ float trace(vec3 from, vec3 dir) {
 
     for (steps = 0; steps < maxSteps; steps++) {
         vec3 p = from + totalDistance * dir;
-        float distance = DE(p);
+        float distance = distanceEstimator(p);
         totalDistance += distance;
         if (distance < minDist) {
             break;
@@ -35,26 +43,15 @@ float trace(vec3 from, vec3 dir) {
 }
 
 vec3 rayDirection() {
-    float normedX = gl_FragCoord.x/screenSize.x - 0.5;
-    float normedY = (gl_FragCoord.y - screenSize.y/2) / screenSize.x;// - 0.5;
+    float normedX = (gl_FragCoord.x - screenSize.x/2) / screenSize.x;
+    float normedY = (gl_FragCoord.y - screenSize.y/2) / screenSize.x;
 
-    vec4 ray = vec4(normedX, 1, normedY, 0);
+    vec4 ray = vec4(normedX, normedY, -1, 0);
     ray = camToWorldMat * ray;
     return normalize(vec3(ray));
 }
 
 void main() {
     float b = trace(vec3(camToWorldMat * vec4(0, 0, 0, 1)), rayDirection());
-    // float b;
-    // vec4 camPos = camToWorldMat * vec4(0, 1, 0, 1);
-    // float val = camPos.y;
-    // float cmp = -2.0;
-    // if (val < cmp) {
-    //     b = 0;
-    // } else if (val == cmp) {
-    //     b = 0.5;
-    // } else if (val > cmp) {
-    //     b = 1;
-    // }
     FragColor = vec4(b, b, b, 1.0);
 }
