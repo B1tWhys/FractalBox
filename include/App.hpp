@@ -1,14 +1,14 @@
 #include "Engine.hpp"
+#include "Settings.hpp"
 #include <iostream>
 
-#ifndef APP
-#define APP
+#pragma once
 /*
 This is a singleton object which represents the Application. Currently it
 only initializes and maintains a pointer to an Engine object, however in
 the future there will be an additional 'settings' window either on another
-thread or in another process, and this will set up the IPC between the 
-settings and the engine.
+thread or in another process, and this will manage the communiation between
+that and the Engine instance.
 */
 
 class App {
@@ -19,9 +19,10 @@ class App {
         void operator=(App const&)    = delete;
 
         void run();
+
+        Engine engine;
+        Settings settings;
     private:
         App();
-        Engine engine;
+        void initSettings();
 };
-
-#endif

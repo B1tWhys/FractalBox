@@ -12,8 +12,10 @@ To clone the project, `cd` to a directory where you want this thing, and then ru
 
 to pull down everything you need
 
+## Requirements
+You need at least CMake version 3.10 and a compiler which is compatable with C++17 or better. CMake will let you know if either one needs to be updated.
 ## Compilation
-Make sure you've got make and CMake installed, then run:
+After recursively cloning the project, run:
 ```
 cd ./FractalBox
 mkdir build
@@ -21,4 +23,4 @@ cd build
 cmake ..
 make
 ```
-Once that finishes, you'll find youself in a build directory (located at `/.../FractalBox/build`), and if everything went well there will be a FractalBox executable that you can run.
+Once that finishes, you'll find youself in a build directory (located at `FractalBox/build`), and if everything went well there will be a `FractalBox` executable that you can run.
