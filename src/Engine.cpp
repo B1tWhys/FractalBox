@@ -55,7 +55,9 @@ void Engine::initWindow() {
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
     glfwSetKeyCallback(window, key_callback);
-//    glfwSetScrollCallback(window, scroll_callback); // TODO: uncomment and implement arrow keys
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(this->window, WIDTH/2, HEIGHT/2);
+//    glfwSetScrollCallback(window, scroll_callback); // TODO: uncomment and implement scrolling
 }
 
 void Engine::initOpengl() {
@@ -167,8 +169,8 @@ void Engine::updateRot() {
     delta_x = xpos - WIDTH/2;
     delta_y = ypos - HEIGHT/2;
 
-    this->cam.rotRight(delta_x/100);
-    this->cam.rotUp(delta_y/100);
+    this->cam.rotRight(delta_x/10);
+    this->cam.rotUp(delta_y/10);
 }
 
 void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int action, int mods) {
@@ -194,6 +196,11 @@ void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int acti
             engineP->cam.setYVel(speed);
         } else if (key == GLFW_KEY_E) {
             engineP->readMouse = !engineP->readMouse;
+            if (engineP->readMouse) {
+                glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            } else {
+                glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            }
         }
     } else if (action == GLFW_RELEASE) {
         if (key == GLFW_KEY_W || key == GLFW_KEY_S) {

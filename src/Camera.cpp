@@ -11,7 +11,7 @@ Camera::Camera() {
     // initialize R to identity matrix (i.e. world space is parallel to camera space)
     this->R = glm::mat4(1.0f); 
     // initialize T such that the camera is at  (x, y, z) = (0, -2, 0)
-    this->T = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, 0.0, -2.0));
+    this->T = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, -0.5, -2.0));
     this->vel = glm::vec4(0);
 }
 
@@ -77,6 +77,6 @@ void Camera::setZVel(float newZVel) {
 }
 
 void Camera::stepTime() {
-    glm::vec4 wSpcVel = camToWorldMat() * this->vel;
+    glm::vec4 wSpcVel = this->vel;
     this->T = glm::translate(this->T, -glm::vec3(wSpcVel));
 }

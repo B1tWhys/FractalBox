@@ -26,7 +26,7 @@ target_include_directories("glad" PRIVATE "${GLAD_DIR}/include")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLAD_DIR}/include")
 target_link_libraries(${PROJECT_NAME} "glad" "${CMAKE_DL_LIBS}")
 
-target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}/glm/glm")
+target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}")
 
 add_compile_definitions(SHADER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/shaders)
 set(CMAKE_BUILD_TYPE Debug)
