@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include "Fractal.hpp"
 #include "Camera.hpp"
+#include "Settings.hpp"
 
 #pragma once
 
@@ -14,10 +15,11 @@ by the App singleton.
 
 class Engine {
     public:
+        Settings *settings;
 
         Fractal *fractal;
 
-        Engine();
+        Engine(Settings *);
         void run();
     private:
         GLFWwindow *window;

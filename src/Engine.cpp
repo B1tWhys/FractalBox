@@ -9,17 +9,15 @@
 #include <glm/ext.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-// TODO: move these into a settings struct
-#define WIDTH 1920
-#define HEIGHT 1080
-
 float vertices[] = {
     -1.0f, 1.0f, 0.0f,
     3.0f, 1.0f, 0.0f,
     -1.0f, -3.0, 0.0f
 };
 
-Engine::Engine() {}
+Engine::Engine(Settings *settings) {
+    this->settings = settings;
+}
 
 void Engine::run() {
     initWindow();
@@ -41,7 +39,7 @@ void Engine::initWindow() {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // maybe change this to disable FPS cap?
 
-    this->window = glfwCreateWindow(WIDTH, HEIGHT, "Fractal Box", NULL, NULL);
+    this->window = glfwCreateWindow(this->settings->width, this->settings->height, "Fractal Box", NULL, NULL);
     if (this->window == NULL) {
         throw std::runtime_error("Failed to create window");
     }
@@ -55,11 +53,13 @@ void Engine::initWindow() {
     gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
 
     glfwSetKeyCallback(window, key_callback);
-//    glfwSetScrollCallback(window, scroll_callback); // TODO: uncomment and implement arrow keys
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPos(this->window, this->settings->width/2, this->settings->height/2);
+//    glfwSetScrollCallback(window, scroll_callback); // TODO: uncomment and implement scrolling
 }
 
 void Engine::initOpengl() {
-    glViewport(0, 0, WIDTH, HEIGHT); // TODO: update these coordinates to make fractal math easier
+    glViewport(0, 0, this->settings->width, this->settings->height); // TODO: update these coordinates to make fractal math easier
     this->initBuffers();
     this->initPipeline();
 }
@@ -113,28 +113,6 @@ void Engine::initPipeline() {
     glDeleteShader(fragmentShader);
 };
 
-//TODO: make these adjustable at runtime
-#define MAXSTEPS 100
-#define MINDIST 0.0001
-void Engine::updateUniforms() {
-    static bool firstUpdate = true;
-    firstUpdate = false;
-
-    int screenSize_loc = glGetUniformLocation(shaderProgram, "screenSize");
-    int fov_loc = glGetUniformLocation(shaderProgram, "FOV");
-    int camWorldMat_loc = glGetUniformLocation(shaderProgram, "camToWorldMat");
-    int worldCamMat_loc = glGetUniformLocation(shaderProgram, "worldToCamMat");
-    int maxSteps_loc = glGetUniformLocation(shaderProgram, "maxSteps");
-    int minDist_loc = glGetUniformLocation(shaderProgram, "minDist");
-
-    glUniform2f(screenSize_loc, WIDTH, HEIGHT);
-    glUniform1f(fov_loc, this->cam.fov);
-    glUniformMatrix4fv(camWorldMat_loc, 1, GL_FALSE, glm::value_ptr(this->cam.camToWorldMat()));
-    glUniformMatrix4fv(worldCamMat_loc, 1, GL_FALSE, glm::value_ptr(this->cam.worldToCamMat()));
-    glUniform1i(maxSteps_loc, MAXSTEPS); // TODO: max steps should be adjustable at runtime
-    glUniform1f(minDist_loc, MINDIST); // TODO: min step distance should be adjustable at runtime
-}
-
 void Engine::mainLoop() {
     while (!glfwWindowShouldClose(window)) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -153,6 +131,28 @@ void Engine::mainLoop() {
     }
 }
 
+void Engine::updateUniforms() {
+    static bool firstUpdate = true;
+    firstUpdate = false;
+
+    int screenSize_loc = glGetUniformLocation(shaderProgram, "screenSize");
+    int fov_loc = glGetUniformLocation(shaderProgram, "FOV");
+    int camWorldMat_loc = glGetUniformLocation(shaderProgram, "camToWorldMat");
+    int worldCamMat_loc = glGetUniformLocation(shaderProgram, "worldToCamMat");
+    int maxSteps_loc = glGetUniformLocation(shaderProgram, "maxSteps");
+    int minDist_loc = glGetUniformLocation(shaderProgram, "minDist");
+
+    glUniform2f(screenSize_loc, this->settings->width, this->settings->height);
+    glUniform1f(fov_loc, this->cam.fov);
+    glUniformMatrix4fv(camWorldMat_loc, 1, GL_FALSE, glm::value_ptr(this->cam.camToWorldMat()));
+    glUniformMatrix4fv(worldCamMat_loc, 1, GL_FALSE, glm::value_ptr(this->cam.worldToCamMat()));
+    
+    this->settings->lock.lock();
+    glUniform1i(maxSteps_loc, this->settings->maxSteps);
+    glUniform1f(minDist_loc, this->settings->minDist);
+    this->settings->lock.unlock();
+}
+
 void Engine::cleanup() {
     glfwDestroyWindow(this->window);
     glfwTerminate();
@@ -161,14 +161,14 @@ void Engine::cleanup() {
 void Engine::updateRot() {
     double xpos, ypos;
     glfwGetCursorPos(this->window, &xpos, &ypos);
-    glfwSetCursorPos(this->window, WIDTH/2, HEIGHT/2);
+    glfwSetCursorPos(this->window, this->settings->width/2, this->settings->height/2);
 
     float delta_x, delta_y;
-    delta_x = xpos - WIDTH/2;
-    delta_y = ypos - HEIGHT/2;
+    delta_x = xpos - this->settings->width/2;
+    delta_y = ypos - this->settings->height/2;
 
-    this->cam.rotRight(delta_x/100);
-    this->cam.rotUp(delta_y/100);
+    this->cam.rotRight(delta_x * this->settings->mouse_sensitivity);
+    this->cam.rotUp(delta_y * this->settings->mouse_sensitivity);
 }
 
 void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int action, int mods) {
@@ -194,6 +194,12 @@ void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int acti
             engineP->cam.setYVel(speed);
         } else if (key == GLFW_KEY_E) {
             engineP->readMouse = !engineP->readMouse;
+            if (engineP->readMouse) {
+                glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                // glfwSetCursorPos(engineP->window, this->settings->width/2, this->settings->height/2);
+            } else {
+                glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            }
         }
     } else if (action == GLFW_RELEASE) {
         if (key == GLFW_KEY_W || key == GLFW_KEY_S) {

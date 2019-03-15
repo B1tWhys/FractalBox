@@ -2,10 +2,14 @@
 #pragma once
 
 struct Settings {
-  std::mutex mutex;
-  int FOV; // fov in degrees
+  std::mutex lock;
 
-  int width;
-  int height;
-  int recurseDepth;
+  // screen resolution
+  int width = 1920; 
+  int height = 1080;
+
+  int maxSteps = 100; // maximum number of ray steps
+  float minDist = .001; // smallest possible ray step
+
+  float mouse_sensitivity = 1/50; // lower number is slower camera movement
 };

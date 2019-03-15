@@ -1,6 +1,9 @@
 #include "Engine.hpp"
 #include "Settings.hpp"
+#include "CLI.hpp"
 #include <iostream>
+#include <thread>
+#include <functional>
 
 #pragma once
 /*
@@ -20,9 +23,16 @@ class App {
 
         void run();
 
-        Engine engine;
         Settings settings;
+
+        // Engine engine;
+        // CLI cli;
+
+        std::reference_wrapper<Engine> engine;
+        std::reference_wrapper<CLI> cli;
+
     private:
+        std::thread engineThread;
+        std::thread cliThread;
         App();
-        void initSettings();
 };
