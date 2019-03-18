@@ -39,8 +39,8 @@ float trace(vec3 from, vec3 dir) {
         }
     }
 
-    return 1.0-totalDistance/20;
-    // return 1.0-float(steps)/float(maxSteps);
+    // return 1.0-totalDistance/20;
+    return 1.0-float(steps)/float(maxSteps);
 }
 
 vec3 rayDirection() {

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(FractalBox)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext")
 file(GLOB SOURCES "src/*.cpp")
@@ -28,5 +30,12 @@ target_link_libraries(${PROJECT_NAME} "glad" "${CMAKE_DL_LIBS}")
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${LIB_DIR}")
 
+find_package(Curses)
+if (CURSES_FOUND)
+    include_directories(${CURSES_INCLUDE_DIRS})
+    target_link_libraries(${PROJECT_NAME} ${CURSES_LIBRARIES})
+else ()
+    message(FATAL_ERROR "Error: Could not locate curses/ncurses library")
+endif ()
+
 add_compile_definitions(SHADER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/shaders)
-set(CMAKE_BUILD_TYPE Debug)

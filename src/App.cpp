@@ -1,15 +1,8 @@
 #include "App.hpp"
 
-App::App() {
-  initSettings();
-}
+// App::App() : engine(&settings), cli(&settings) { }
 
-void App::initSettings() {
-    this->settings.FOV = 90;
-    this->settings.height = 1920;
-    this->settings.width = 1080;
-    this->settings.recurseDepth = 100;
-}
+App::App(): engine(Engine(&settings)), cli(CLI(&settings)) { }
 
 App &App::getInstance() {
     static App instance;
@@ -17,5 +10,7 @@ App &App::getInstance() {
 }
 
 void App::run() {
-    this->engine.run();
+    this->engineThread = std::thread(&Engine::run, std::ref(this->engine));
+    // this->engine.run();
+    // this->cliThread = std::thread(&CLI::run, this->cli);
 }
