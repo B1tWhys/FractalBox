@@ -17,12 +17,12 @@ float vertices[] = {
 
 Engine::Engine(Settings *settings) {
     this->settings = settings;
+    this->readMouse = true;
 }
 
 void Engine::run() {
     initWindow();
     initOpengl();
-    this->readMouse = true;
     mainLoop();
 }
 
