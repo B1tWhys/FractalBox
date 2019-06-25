@@ -39,3 +39,8 @@ else ()
 endif ()
 
 add_compile_definitions(SHADER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/shaders)
+
+# Adds 'run' target to makefile
+add_custom_target(run
+    "${PROJECT_NAME}"
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
