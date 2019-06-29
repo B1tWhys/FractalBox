@@ -91,7 +91,7 @@ vec3 rayDirection() {
     float normedX = (gl_FragCoord.x - screenSize.x/2) / screenSize.x;
     float normedY = (gl_FragCoord.y - screenSize.y/2) / screenSize.x;
     
-    vec4 ray = vec4(normedX, normedY, -1, 0);
+    vec4 ray = vec4(normedX, normedY, 1, 0);
     ray = camToWorldMat * ray;
     return normalize(vec3(ray));
 }

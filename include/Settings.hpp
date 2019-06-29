@@ -8,7 +8,7 @@ struct Settings {
   int width = 1920; 
   int height = 1080;
 
-  int maxSteps = 300; // maximum number of ray steps
+  int maxSteps = 500; // maximum number of ray steps
   float minDist = .001; // smallest possible ray step
 
   float mouse_sensitivity = 1.0f/50; // lower number is slower camera movement
