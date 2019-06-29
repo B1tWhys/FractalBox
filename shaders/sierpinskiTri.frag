@@ -13,11 +13,12 @@ uniform mat4 worldToCamMat;
 
 out vec4 FragColor;
 
-const float minDist = 0.005;
-const int maxSteps = 500;
+const float minDist = .003;
+const float maxDist = 80;
+const int maxSteps = 200;
 
 // TODO: make these uniforms
-const int iterations = 8;
+const int iterations = 10;
 const vec3 lightColor = vec3(1.0, 1.0, 1.0);
 float brightness = 8;
 const vec3 ambientColor = vec3(0.1);
@@ -31,45 +32,29 @@ const float epsilon = 0.00001;
 
 
 float DE_triangle(vec3 p) {
-    /* these are NOT the vertices of the tetrahedron!! They are actually the normal 
-    vectors for each face, although this also happens to be a larger tetrahedron.
-    These coordinates form a tetrahedron whose points are all on the unit sphere centered
-    on the origin, but this one points 'downward' while the one being rendered points upward
-    and is much smaller (2/3, actually). Another way to think of this is that the tetrahedron that's actually
-    rendered has vertices which exactly touch the middle of each of the faces of this one.
     
-    extra notes:
-    the edge length of the bounding tet. is sqrt(8/3) and the height (from vert to opp. face)
-    is 4/3
-    */
-    
-    // Edit: actually these are not relevant at all. all the tetrahedron stuff is currently done via space folding
-    // symmetries.
-    vec3 n1 = vec3(-sqrt(8./.9), 0, 1./.3);
-    vec3 n2 = vec3(sqrt(2./.9), -sqrt(2./3.), 1./3.);
-    vec3 n3 = vec3(sqrt(2./.9), sqrt(2./3.), 1./3.);
+    vec3 n1 = vec3(-sqrt(8./9.), 0, 1/3);    
+    vec3 n2 = vec3(sqrt(2./9.), -sqrt(2./3.), 1./3.);    
+    vec3 n3 = vec3(0, 0, 1/3);
     vec3 n4 = vec3(0, 0, -1);
-    n1 = -n1;
-    n2 = -n2;
-    n3 = -n2;
-    n4 = -n2;
 
-    vec3 c = n3;
     float dist, d;
     // float scale = 2;
     float scale = 2;
     
     int n;
     for (n = 0; n < iterations; n++) {
-        // if (p.x < 0.) p.x = -p.x;
-        // if (p.y < 0.) p.y = -p.y;
-        // if (p.z < 0.) p.z = -p.z;
+        float d = dot(p, n1);
 
-        if(p.x+p.y<0.0) p.xy = -p.yx;
-        if(p.x+p.z<0.0) p.xz = -p.zx;
-        if(p.y+p.z<0.0)p.zy = -p.yz;
+        if(p.y + p.z < 0.0) p.zy = -p.yz;
+        if(p.x + p.y < 0.0) p.xy = -p.yx;
+        if(p.x + p.z < 0.0) p.xz = -p.zx;
+        // if(p.x + p.y < 0.0) p.xy = -p.yx;
+        // if(p.x + p.z < 0.0) p.xz = -p.zx;
+        // if(p.y + p.z < 0.0) p.zy = -p.yz;
 
-        p = p*scale - 1;
+        p = p * scale - 1;
+        // p = p - 1;
     }
     
     // return dot(p-c, c);
@@ -78,13 +63,31 @@ float DE_triangle(vec3 p) {
 }
 
 float DE_ground(vec3 p) {
-    // return abs(p.x + p.y);
-    return abs(p.y) + 2;
+
+    // return 1./0.;
+    return abs(p.y+2.1);
+}
+
+bool indicator = false;
+float DE_indicator(vec3 p) {
+    if (!indicator) return 1./0.;
+    vec3 pt = vec3(-.6, -.5, .6);
+    float r = .1;
+    float gap = r*.05;
+    
+    vec3 c1 = pt - vec3(r+gap, 0, 0);
+    vec3 c2 = pt + vec3(r+gap, 0, 0);
+
+    float dist1 = length(p - c1) - r;
+    float dist2 = length(p - c2) - r;
+    
+    return min(dist1, dist2);
 }
 
 float DE(vec3 p) {
     float dist;
     dist = min(DE_ground(p), DE_triangle(p));
+    dist = min(dist, DE_indicator(p));
     // dist = DE_triangle(p);
     return dist;
 }
@@ -104,9 +107,9 @@ vec4 trace(vec3 from, vec3 dir) {
         totalDistance += distance;
         if (distance < minDist) {
             return vec4(p, steps);
-        } /*else if (false && totalDistance > 30) {
+        } else if (totalDistance > maxDist) {
             return vec4(1./0);
-        }*/
+        }
     }
     
     return vec4(1./0);
@@ -163,10 +166,7 @@ void main() {
     if (isinf(rayIntersect.x)) {
         FragColor = vec4(196, 228, 255, 255)/255.;
         return;
-    } else if (rayIntersect.y <= epsilon) {
-        diffuseColor *= .5;
     }
-    
     // surface normal
     float delta = 0.0001;
     vec3 n = normalize(vec3(DE(rayIntersect + xDir * delta) - DE(rayIntersect - xDir * delta),
@@ -174,10 +174,20 @@ void main() {
                             DE(rayIntersect + zDir * delta) - DE(rayIntersect - zDir * delta)));
 
     vec3 color;
-    if (true) {
+    if (false) {
         float base = 8;
         color = vec3(pow(base, stepCount/maxSteps)/base);
         FragColor = vec4(color, 1.0);
+        if (rayIntersect.y < -1) {
+            FragColor = vec4(.8, .8, .8, 1.);
+        }
+        if (rayIntersect.x > 0) {
+            FragColor += vec4(.2, 0, 0, 0);
+        } 
+        
+        if (rayIntersect.z > 0) {
+            FragColor += vec4(0, .2, 0, 0);
+        }
     } else {
         vec3 lightPos = vec3(0, 15, 0);
         color += blinnPhong(rayIntersect, n, -rayDir, lightPos);
