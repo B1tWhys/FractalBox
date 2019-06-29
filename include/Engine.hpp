@@ -3,6 +3,7 @@
 #include "Fractal.hpp"
 #include "Camera.hpp"
 #include "Settings.hpp"
+#include <mutex>
 
 #pragma once
 
@@ -12,6 +13,16 @@ When it is initialized by the App singleton, it gets everything ready but doesn'
 enter the main game loop. Rather, the game loop is run in a seperate thread which is managed
 by the App singleton.
 */
+
+struct UniformLocations {
+    std::mutex lock;
+    int screenSize;
+    int fov;
+    int camWorldMat;
+    int worldCamMat;
+    int maxSteps;
+    int minDist;
+};
 
 class Engine {
     public:
@@ -28,11 +39,13 @@ class Engine {
         unsigned int VAO; // Vertex array object
         Camera cam;
         bool readMouse;
+        struct UniformLocations uniformLocations;
 
         void initWindow();
         void initOpengl();
         void initBuffers();
         void initPipeline();
+        void locateUniforms();
         void cleanup();
         
         void mainLoop();

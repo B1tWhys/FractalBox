@@ -15,6 +15,8 @@ Engine (usually it updates Engine's Settings struct, then calls the funciton to 
 the render pipeline).
 */
 
+void dbgLog(const char *format...);
+
 class CLI {
     public:
         CLI(Settings *);

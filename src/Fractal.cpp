@@ -8,6 +8,7 @@ Fractal::Fractal() {
     this->vertShader = this->compileFragShaderFromSrc("../shaders/triangle.vert", GL_VERTEX_SHADER);
     // this->fragShader = this->compileFragShaderFromSrc("../shaders/mandelbrot.frag", GL_FRAGMENT_SHADER);
     this->fragShader = this->compileFragShaderFromSrc("../shaders/sphere.frag", GL_FRAGMENT_SHADER);
+    // this->fragShader = this->compileFragShaderFromSrc("../shaders/sierpinskiSquare.frag", GL_FRAGMENT_SHADER);
 }
 
 unsigned int Fractal::compileFragShaderFromSrc(const char *fname, GLenum shaderType) {

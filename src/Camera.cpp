@@ -6,51 +6,64 @@
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+using namespace glm;
+
 Camera::Camera() {
     this->fov = 90;
     // initialize R to identity matrix (i.e. world space is parallel to camera space)
-    this->R = glm::mat4(1.0f); 
-    // initialize T such that the camera is at  (x, y, z) = (0, -2, 0)
-    this->T = glm::translate(glm::mat4(1.0f), glm::vec3(0.0, -0.5, -2.0));
-    this->vel = glm::vec4(0);
+    this->R = mat4(1.0f);
+    this->T = translate(mat4(1.0f), vec3(0.0, -7., -8.0));
+    rotUp(45);
+    // this->R = lookAt(vec3(-getCamPos()), vec3(0), vec3(0, 1, 0));
+    this->vel = vec4(0);
 }
 
-glm::mat4 Camera::camToWorldMat() {
-    return glm::inverse(worldToCamMat());
+vec4 Camera::getCamPos() {
+    return camToWorldMat() * vec4(0, 0, 0, 1);
 }
 
-glm::mat4 Camera::worldToCamMat() {
+mat4 Camera::camToWorldMat() {
+    return inverse(worldToCamMat());
+}
+
+mat4 Camera::worldToCamMat() {
     return this->R * this->T;
-    // return this->T * this->R;
 }
 
-
-glm::vec4 Camera::getCamRight() {
-    return camToWorldMat() * glm::vec4(1, 0, 0, 0);
+vec4 Camera::getCamRight() {
+    return normalize(camToWorldMat() * vec4(1, 0, 0, 0));
 }
 
-glm::vec4 Camera::getCamForward() {
-    return camToWorldMat() * glm::vec4(0, 0, -1, 0);
+vec4 Camera::getCamUp() {
+    return normalize(camToWorldMat() * vec4(0, 1, 0, 0));
 }
 
-glm::vec4 Camera::getCamUp() {
-    return camToWorldMat() * glm::vec4(0, 1, 0, 0);
+vec4 Camera::getCamForward() {
+    return normalize(camToWorldMat() * vec4(0, 0, -1, 0));
 }
 
 /*
 If you do the existing rotation, then the new rotation, then the new rotation is happening
 in camera space. If you do the new rotation *and then* do the existing rotation, then the
-new rotation is happening in *world space*. So flipping the order of the matrix
-multiplication here changes if you are rotating along axis in world space or in camera space.
+new rotation is happening in *world space*. So flipping the sequence of the matrix
+multiplication here changes if you are rotating along axes in world space or in camera space.
 
 ... fuck ...
 */
 void Camera::rotRight(float degrees) { // L/R rotation should be along Y in world space
-    this->R = this->R * glm::rotate(glm::radians(degrees), glm::vec3(0, 1, 0)) ;
+    this->R = this->R * rotate(radians(degrees), vec3(0, 1, 0));
+    if (degrees) {
+        vec3 camForward = getCamForward();
+        printf("CamForward: (%.2f, %.2f, %.2f)\n", camForward.x, camForward.y, camForward.z);
+    }
 }
 
 void Camera::rotUp(float degrees) { // U/D rotation should be along X in camera space
-    this->R = glm::rotate(glm::radians(degrees), glm::vec3(1, 0, 0)) * this->R;
+    this->R = rotate(radians(degrees), vec3(1, 0, 0)) * this->R;
+    if (degrees) {
+        vec3 camForward = getCamForward();
+        printf("CamForward: (%.2f, %.2f, %.2f)\n", camForward.x, camForward.y, camForward.z);
+    }
 }
 
 void Camera::setXVel(float newXVel) {
@@ -77,6 +90,11 @@ void Camera::setZVel(float newZVel) {
 }
 
 void Camera::stepTime() {
-    glm::vec4 wSpcVel = this->vel;
-    this->T = glm::translate(this->T, -glm::vec3(wSpcVel));
+    vec4 wSpcVel = camToWorldMat() * vel;
+    // this->T = glm::translate(this->T, -glm::vec3(wSpcVel.x, wSpcVel.y, vel.z));
+    this->T = translate(this->T, -vec3(wSpcVel));
+    if (length(wSpcVel)) {
+        vec3 camPos = getCamPos();
+        printf("CamPos: (%.2f, %.2f, %.2f)\n", camPos.x, camPos.y, camPos.z);
+    }
 }

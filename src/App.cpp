@@ -1,8 +1,15 @@
 #include "App.hpp"
 
-// App::App() : engine(&settings), cli(&settings) { }
+App::App() : engine(&settings), cli(&settings) {
+    
+}
+App::~App() {
+    if (this->engineThread.joinable()) {
+        this->engineThread.join();
+    }
+}
 
-App::App(): engine(Engine(&settings)), cli(CLI(&settings)) { }
+// App::App(): engine(Engine(&settings)), cli(CLI(&settings)) { }
 
 App &App::getInstance() {
     static App instance;

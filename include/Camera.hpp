@@ -1,4 +1,5 @@
 #include <glm/glm.hpp>
+#include "CLI.hpp"
 
 #pragma once
 /*
@@ -22,6 +23,7 @@ class Camera {
         glm::vec4 getCamForward();
         glm::vec4 getCamRight();
         glm::vec4 getCamUp();
+        glm::vec4 getCamPos();
 
         // void setXPos(float newX);
         // void setYPos(float newY);
@@ -39,7 +41,6 @@ class Camera {
         void stepTime();
     private:
         // glm::vec4 pos; // in world space
-
         glm::mat4 R; // world space -> camera space rotation matrix
         glm::mat4 T; // world space -> camera space translation matrix
 

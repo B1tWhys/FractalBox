@@ -11,5 +11,4 @@ CLI::~CLI() {
 
 void CLI::run() {
     assert(this->settings != nullptr);
-    
 }

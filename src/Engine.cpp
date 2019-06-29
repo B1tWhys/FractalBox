@@ -18,11 +18,26 @@ float vertices[] = {
 Engine::Engine(Settings *settings) {
     this->settings = settings;
     this->readMouse = true;
+    initWindow();
+    initOpengl();
+    locateUniforms();
+    updateUniforms();
+    glfwMakeContextCurrent(NULL); // Remove context from main thread. The context is made current again in run()
+}
+
+void Engine::locateUniforms() {
+    uniformLocations.lock.lock();
+    uniformLocations.screenSize = glGetUniformLocation(shaderProgram, "screenSize");
+    uniformLocations.fov = glGetUniformLocation(shaderProgram, "FOV");
+    uniformLocations.camWorldMat = glGetUniformLocation(shaderProgram, "camToWorldMat");
+    uniformLocations.worldCamMat = glGetUniformLocation(shaderProgram, "worldToCamMat");
+    uniformLocations.maxSteps = glGetUniformLocation(shaderProgram, "maxSteps");
+    uniformLocations.minDist = glGetUniformLocation(shaderProgram, "minDist");
+    uniformLocations.lock.unlock();
 }
 
 void Engine::run() {
-    initWindow();
-    initOpengl();
+    glfwMakeContextCurrent(window);
     mainLoop();
 }
 
@@ -36,26 +51,18 @@ void Engine::initWindow() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
+    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // maybe change this to disable FPS cap?
 
     this->window = glfwCreateWindow(this->settings->width, this->settings->height, "Fractal Box", NULL, NULL);
-    if (this->window == NULL) {
-        throw std::runtime_error("Failed to create window");
-    }
+    if (this->window == NULL) throw std::runtime_error("Failed to create window");
     glfwMakeContextCurrent(window);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        throw std::runtime_error("Failed to init GLAD");
-    }
-
-    glfwMakeContextCurrent(window);
-    gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) throw std::runtime_error("Failed to init GLAD");
 
     glfwSetKeyCallback(window, key_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPos(this->window, this->settings->width/2, this->settings->height/2);
-//    glfwSetScrollCallback(window, scroll_callback); // TODO: uncomment and implement scrolling
+//    glfwSetScrollCallback(window, scroll_callback); // TODO
 }
 
 void Engine::initOpengl() {
@@ -115,11 +122,12 @@ void Engine::initPipeline() {
 
 void Engine::mainLoop() {
     while (!glfwWindowShouldClose(window)) {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        // glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        // glClear(GL_COLOR_BUFFER_BIT);
 
-        updateUniforms();
+        if (readMouse) updateRot();
         this->cam.stepTime();
+        updateUniforms();
         glUseProgram(this->shaderProgram);
         glBindVertexArray(this->VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -127,29 +135,19 @@ void Engine::mainLoop() {
         glfwSwapBuffers(window);
         // glFinish();
         glfwPollEvents();
-        if (readMouse) updateRot();
     }
 }
 
 void Engine::updateUniforms() {
-    static bool firstUpdate = true;
-    firstUpdate = false;
-
-    int screenSize_loc = glGetUniformLocation(shaderProgram, "screenSize");
-    int fov_loc = glGetUniformLocation(shaderProgram, "FOV");
-    int camWorldMat_loc = glGetUniformLocation(shaderProgram, "camToWorldMat");
-    int worldCamMat_loc = glGetUniformLocation(shaderProgram, "worldToCamMat");
-    int maxSteps_loc = glGetUniformLocation(shaderProgram, "maxSteps");
-    int minDist_loc = glGetUniformLocation(shaderProgram, "minDist");
-
-    glUniform2f(screenSize_loc, this->settings->width, this->settings->height);
-    glUniform1f(fov_loc, this->cam.fov);
-    glUniformMatrix4fv(camWorldMat_loc, 1, GL_FALSE, glm::value_ptr(this->cam.camToWorldMat()));
-    glUniformMatrix4fv(worldCamMat_loc, 1, GL_FALSE, glm::value_ptr(this->cam.worldToCamMat()));
-    
     this->settings->lock.lock();
-    glUniform1i(maxSteps_loc, this->settings->maxSteps);
-    glUniform1f(minDist_loc, this->settings->minDist);
+    this->uniformLocations.lock.lock();
+    glUniform1f(uniformLocations.fov, this->cam.fov);
+    glUniform2f(uniformLocations.screenSize, this->settings->width, this->settings->height);
+    glUniformMatrix4fv(uniformLocations.camWorldMat, 1, GL_FALSE, glm::value_ptr(this->cam.camToWorldMat()));
+    glUniformMatrix4fv(uniformLocations.worldCamMat, 1, GL_FALSE, glm::value_ptr(this->cam.worldToCamMat()));
+    glUniform1i(uniformLocations.maxSteps, this->settings->maxSteps);
+    glUniform1f(uniformLocations.minDist, this->settings->minDist);
+    this->uniformLocations.lock.unlock();
     this->settings->lock.unlock();
 }
 
@@ -172,9 +170,10 @@ void Engine::updateRot() {
 }
 
 void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int action, int mods) {
-    float speed = 0.02;
+    float speed = 0.1;
     Engine *engineP = &App::getInstance().engine;
     if (action == GLFW_PRESS) {
+        // TODO: In retrospect it would have been better if this had been a switch from the start
         if (key == GLFW_KEY_ESCAPE||
             key == GLFW_KEY_Q) {
             glfwSetWindowShouldClose(keyWindow, GLFW_TRUE);
@@ -196,7 +195,7 @@ void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int acti
             engineP->readMouse = !engineP->readMouse;
             if (engineP->readMouse) {
                 glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                // glfwSetCursorPos(engineP->window, this->settings->width/2, this->settings->height/2);
+                glfwSetCursorPos(engineP->window, engineP->settings->width/2, engineP->settings->height/2);
             } else {
                 glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             }

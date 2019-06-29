@@ -25,14 +25,12 @@ class App {
 
         Settings settings;
 
-        // Engine engine;
-        // CLI cli;
-
-        std::reference_wrapper<Engine> engine;
-        std::reference_wrapper<CLI> cli;
+        Engine engine;
+        CLI cli;
 
     private:
         std::thread engineThread;
         std::thread cliThread;
         App();
+        ~App();
 };
