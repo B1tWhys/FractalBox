@@ -17,7 +17,11 @@ App &App::getInstance() {
 }
 
 void App::run() {
+#ifndef __APPLE__
     this->engineThread = std::thread(&Engine::run, std::ref(this->engine));
-    // this->engine.run();
+#else
+    this->engine.run();
+#endif
+
     // this->cliThread = std::thread(&CLI::run, this->cli);
 }

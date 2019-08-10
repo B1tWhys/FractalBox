@@ -1,4 +1,7 @@
-#include <glad/glad.h>
+#ifndef __APPLE__
+#include <glad/glad.h> // macOS does not need a function loader
+#endif
+
 #include <GLFW/glfw3.h>
 #include "Fractal.hpp"
 #include "Camera.hpp"

@@ -137,7 +137,11 @@ void Engine::mainLoop() {
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
-        // glFinish();
+
+#ifdef __APPLE__
+        glFinish(); // faster perf on macOS
+#endif
+
         glfwPollEvents();
     }
 }
