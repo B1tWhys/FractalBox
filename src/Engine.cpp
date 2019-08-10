@@ -51,7 +51,11 @@ void Engine::initWindow() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // neccessary for OS X support
+#endif
+
     glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE); // maybe change this to disable FPS cap?
 
     this->window = glfwCreateWindow(this->settings->width, this->settings->height, "Fractal Box", NULL, NULL);
@@ -133,7 +137,11 @@ void Engine::mainLoop() {
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
-        // glFinish();
+
+#ifdef __APPLE__
+        glFinish(); // faster perf on macOS
+#endif
+
         glfwPollEvents();
     }
 }
