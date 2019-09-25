@@ -41,6 +41,7 @@ else ()
 endif ()
 
 add_compile_definitions(SHADER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/shaders)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Adds 'run' target to makefile
 add_custom_target(run
