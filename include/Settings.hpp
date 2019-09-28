@@ -12,4 +12,6 @@ struct Settings {
   float minDist = .001; // smallest possible ray step
 
   float mouse_sensitivity = 1.0f/50; // lower number is slower camera movement
+
+  bool preTrace = true
 };

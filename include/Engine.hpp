@@ -40,6 +40,7 @@ class Engine {
         unsigned int shaderProgram;
         unsigned int VBO; // Vertex buffer object
         unsigned int VAO; // Vertex array object
+        unsigned int preTraceBuffer;
         Camera cam;
         bool readMouse;
         struct UniformLocations uniformLocations;
