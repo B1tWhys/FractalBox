@@ -19,4 +19,5 @@ class Fractal {
         unsigned int fragShader;
     private:
         unsigned int compileFragShaderFromSrc(const char *fname, GLenum shaderType);
+        std::string *includeFiles(std::string deShader);
 };

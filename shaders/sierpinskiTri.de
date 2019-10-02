@@ -1,0 +1,64 @@
+#version 430
+#include "../shaders/globals.frag"
+
+float DE_triangle(vec3 p) {
+    
+    vec3 n1 = vec3(-sqrt(8./9.), 0, 1/3);    
+    vec3 n2 = vec3(sqrt(2./9.), -sqrt(2./3.), 1./3.);
+    vec3 n3 = vec3(0, 0, 1/3);
+    vec3 n4 = vec3(0, 0, -1);
+
+    float dist, d;
+    // float scale = 2;
+    float scale = 2;
+    
+    int n;
+    for (n = 0; n < iterations; n++) {
+        float d = dot(p, n1);
+
+        if(p.y + p.z < 0.0) p.zy = -p.yz;
+        if(p.x + p.y < 0.0) p.xy = -p.yx;
+        if(p.x + p.z < 0.0) p.xz = -p.zx;
+        // if(p.x + p.y < 0.0) p.xy = -p.yx;
+        // if(p.x + p.z < 0.0) p.xz = -p.zx;
+        // if(p.y + p.z < 0.0) p.zy = -p.yz;
+
+        p = p * scale - 1;
+        // p = p - 1;
+    }
+    
+    // return dot(p-c, c);
+    // return length(p) - .2;
+    return (length(p) * pow(scale, float(-n)));
+}
+
+float DE_ground(vec3 p) {
+    // return 1./0.;
+    return abs(p.y+2.1);
+}
+
+bool indicator = false;
+float DE_indicator(vec3 p) {
+    if (!indicator) return 1./0.;
+    vec3 pt = vec3(-.6, -.5, .6);
+    float r = .1;
+    float gap = r*.05;
+    
+    vec3 c1 = pt - vec3(r+gap, 0, 0);
+    vec3 c2 = pt + vec3(r+gap, 0, 0);
+
+    float dist1 = length(p - c1) - r;
+    float dist2 = length(p - c2) - r;
+    
+    return min(dist1, dist2);
+}
+
+float DE(vec3 p) {
+    float dist;
+    dist = min(DE_ground(p), DE_triangle(p));
+    dist = min(dist, DE_indicator(p));
+    // dist = DE_triangle(p);
+    return dist;
+}
+
+#include "../shaders/marcher.frag"
