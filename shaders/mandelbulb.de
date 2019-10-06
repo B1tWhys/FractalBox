@@ -1,0 +1,32 @@
+#version 430
+#include "../shaders/globals.frag"
+
+const int bailout = 2;
+const int power = 9;
+
+float DE(vec3 pos) {
+	vec3 z = pos;
+	float dr = 1;
+	float r = 0.0;
+	for (int i = 0; i < 20 ; i++) {
+		r = length(z);
+		if (r>bailout) break;
+		
+		// convert to polar coordinates
+		float theta = acos(z.z/r);
+		float phi = atan(z.y,z.x);
+		dr =  pow( r, power-1.0)*power*dr + 1.0;
+		
+		// scale and rotate the point
+		float zr = pow( r,power);
+		theta = theta*power;
+		phi = phi*power;
+		
+		// convert back to cartesian coordinates
+		z = zr*vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta));
+		z+=pos;
+	}
+	return 0.5*log(r)*r/dr;
+}
+
+#include "../shaders/marcher.frag"

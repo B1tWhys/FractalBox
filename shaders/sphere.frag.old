@@ -1,26 +1,5 @@
 #version 410 core
-
-in vec4 gl_FragCoord;
-
-uniform vec2 screenSize;
-uniform float FOV;
-uniform mat4 camToWorldMat;
-uniform mat4 worldToCamMat;
-uniform int maxSteps;
-uniform float minDist;
-
-out vec4 FragColor;
-
-// TODO: make these uniforms
-const vec3 lightColor = vec3(1.0, 1.0, 1.0);
-float brightness = 40;
-const vec3 ambientColor = vec3(0.1);
-vec3 diffuseColor = vec3(0.8);
-const vec3 specColor = vec3(2.0);
-const float shininess = 4.;
-const float screenGamma = 2.2;
-
-const float epsilon = 0.00001;
+#include "../shaders/globals.frag"
 
 float DE_sphere_instanced(vec3 p) {
     p.xz = mod((p.xz), 1.0) - vec2(0.5);
@@ -59,8 +38,8 @@ float DE_ground(vec3 p) {
 float DE(vec3 p) {
     float minDist = DE_ground(p);
     
-    // minDist = min(minDist, DE_sphere(p));
-    minDist = min(minDist, DE_sphere_instanced(p));
+    minDist = min(minDist, DE_sphere(p));
+    // minDist = min(minDist, DE_sphere_instanced(p));
     return minDist;
 }
 

@@ -37,7 +37,6 @@ bool isObstructed(vec3 startPt, vec3 endPt) {
 }
 
 vec3 blinnPhong(vec3 surfacePt, vec3 surfaceNorm, vec3 rayDir, vec3 lightPos) {
-    // lightPos.xz = mod((lightPos.xz), 20) + vec2(8);
     vec3 lightDir = lightPos - surfacePt;
     float distance = pow(length(lightDir), 2);
     lightDir = normalize(lightDir);
@@ -45,12 +44,11 @@ vec3 blinnPhong(vec3 surfacePt, vec3 surfaceNorm, vec3 rayDir, vec3 lightPos) {
     float lambertian = dot(lightDir, surfaceNorm);
     float specular = 0.0;
     
-    // if (!isObstructed(surfacePt, lightPos)) {
-    if (lambertian > 0.) {
+    if (!isObstructed(surfacePt, lightPos)) {
         vec3 halfDir = normalize(rayDir + lightDir);
         float specAngle = max(dot(halfDir, surfaceNorm), 0.0);
         specular = pow(specAngle, shininess);
-    }  
+    }
 
     vec3 colorLinear = ambientColor +
                        diffuseColor * lambertian * lightColor * brightness / distance +

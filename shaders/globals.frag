@@ -9,13 +9,13 @@ uniform mat4 worldToCamMat;
 
 out vec4 FragColor;
 
-const float minDist = .003;
-const float maxDist = 80.;
-const int maxSteps = 200;
+const float minDist = .0001;
+const float maxDist = 200.;
+const int maxSteps = 800;
 
 // TODO: make these uniforms
-const int iterations = 10;
-const vec3 lightColor = vec3(1.0, 1.0, 1.0);
+const int iterations = 8;
+const vec3 lightColor = vec3(2.0, 1.0, 1.0);
 float brightness = 8.;
 const vec3 ambientColor = vec3(0.1);
 vec3 diffuseColor = vec3(1.);

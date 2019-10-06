@@ -7,7 +7,8 @@
 Fractal::Fractal() {
     this->name = "Mandelbrot";
     this->vertShader = this->compileFragShaderFromSrc("../shaders/triangle.vert", GL_VERTEX_SHADER);
-    this->fragShader = this->compileFragShaderFromSrc("../shaders/sierpinskiTri.de", GL_FRAGMENT_SHADER);
+    //this->fragShader = this->compileFragShaderFromSrc("../shaders/sphere.de", GL_FRAGMENT_SHADER);
+    this->fragShader = this->compileFragShaderFromSrc("../shaders/mandelbulb.de", GL_FRAGMENT_SHADER);
 }
 
 std::string readFile(const char *fName) {

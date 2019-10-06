@@ -1,0 +1,9 @@
+#version 430
+#include "../shaders/globals.frag"
+
+float DE(vec3 p) {
+    return min(p.y, length(p - vec3(0, 1, 0)) - 1);
+}
+
+#include "../shaders/marcher.frag"
+

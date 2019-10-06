@@ -2,7 +2,6 @@
 #include "../shaders/globals.frag"
 
 float DE_triangle(vec3 p) {
-    
     vec3 n1 = vec3(-sqrt(8./9.), 0, 1/3);    
     vec3 n2 = vec3(sqrt(2./9.), -sqrt(2./3.), 1./3.);
     vec3 n3 = vec3(0, 0, 1/3);
@@ -46,7 +45,7 @@ float DE_indicator(vec3 p) {
     
     vec3 c1 = pt - vec3(r+gap, 0, 0);
     vec3 c2 = pt + vec3(r+gap, 0, 0);
-
+    
     float dist1 = length(p - c1) - r;
     float dist2 = length(p - c2) - r;
     
