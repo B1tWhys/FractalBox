@@ -97,6 +97,10 @@ void Camera::stepTime() {
         vec3 camPos = getCamPos();
         printf("CamPos: (%.2f, %.2f, %.2f)\n", camPos.x, camPos.y, camPos.z);
     }
-    this->loc2d.x += vel.x;
-    this->loc2d.y -= vel.z; 
+    dvec2 vel_2d = dvec2(vel.x, -vel.z);
+    if (length(vel_2d) > std::numeric_limits<double>::epsilon()) {
+        this->loc2d += glm::normalize(glm::dvec2(vel.x, -vel.z)) * max(abs((double)vel.x), abs((double)vel.z));
+    }
+    //this->loc2d.x += vel.x;
+    //this->loc2d.y -= vel.z; 
 }
