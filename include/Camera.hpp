@@ -18,6 +18,7 @@ class Camera {
     public:
         Camera();
         float fov;
+        glm::dvec2 loc2d;
         glm::vec4 vel; // in camera space
 
         glm::vec4 getCamForward();
@@ -38,6 +39,7 @@ class Camera {
 
         glm::mat4 camToWorldMat();
         glm::mat4 worldToCamMat();
+
         void stepTime();
     private:
         // glm::vec4 pos; // in world space

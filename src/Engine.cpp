@@ -33,6 +33,12 @@ void Engine::locateUniforms() {
     uniformLocations.worldCamMat = glGetUniformLocation(shaderProgram, "worldToCamMat");
     uniformLocations.maxSteps = glGetUniformLocation(shaderProgram, "maxSteps");
     uniformLocations.minDist = glGetUniformLocation(shaderProgram, "minDist");
+    uniformLocations.hlUniform = glGetUniformLocation(shaderProgram, "hlUniform");
+    uniformLocations.kiUniform = glGetUniformLocation(shaderProgram, "kiUniform");
+    uniformLocations.lrUniform = glGetUniformLocation(shaderProgram, "lrUniform");
+    uniformLocations.udUniform = glGetUniformLocation(shaderProgram, "udUniform");
+    uniformLocations.commaPeriodUniform = glGetUniformLocation(shaderProgram, "commaPeriodUniform");
+    uniformLocations.scrollUniform = glGetUniformLocation(shaderProgram, "scrollUniform");
     uniformLocations.lock.unlock();
 }
 
@@ -66,7 +72,7 @@ void Engine::initWindow() {
 
     glfwSetKeyCallback(window, key_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-//    glfwSetScrollCallback(window, scroll_callback); // TODO
+    glfwSetScrollCallback(window, scroll_callback);
 }
 
 void Engine::initOpengl() {
@@ -155,6 +161,13 @@ void Engine::updateUniforms() {
     glUniformMatrix4fv(uniformLocations.worldCamMat, 1, GL_FALSE, glm::value_ptr(this->cam.worldToCamMat()));
     glUniform1i(uniformLocations.maxSteps, this->settings->maxSteps);
     glUniform1f(uniformLocations.minDist, this->settings->minDist);
+    glUniform1f(uniformLocations.hlUniform, this->wildcardUniforms.hlUniform);
+    glUniform1f(uniformLocations.kiUniform, this->wildcardUniforms.kiUniform);
+    glUniform1f(uniformLocations.lrUniform, this->wildcardUniforms.lrUniform); // left/right arrows
+    glUniform1f(uniformLocations.udUniform, this->wildcardUniforms.udUniform); // up/down arrows
+    glUniform1f(uniformLocations.commaPeriodUniform, this->wildcardUniforms.commaPeriodUniform);
+    glUniform2f(uniformLocations.scrollUniform, this->wildcardUniforms.scrollUniform.x, this->wildcardUniforms.scrollUniform.y);
+    glUniform2d(uniformLocations.loc2d, this->cam.loc2d.x, this->cam.loc2d.y);
     this->uniformLocations.lock.unlock();
     this->settings->lock.unlock();
 }
@@ -178,45 +191,118 @@ void Engine::updateRot() {
 }
 
 void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int action, int mods) {
-    float speed = 0.1;
     Engine *engineP = &App::getInstance().engine;
+    float speed = 0.1 * pow(0.5, engineP->wildcardUniforms.scrollUniform.y);
     if (action == GLFW_PRESS) {
         // TODO: In retrospect it would have been better if this had been a switch from the start
-        if (key == GLFW_KEY_ESCAPE||
-            key == GLFW_KEY_Q) {
-            glfwSetWindowShouldClose(keyWindow, GLFW_TRUE);
-        } else if (key == GLFW_KEY_R) {
-            engineP->initPipeline();
-        } else if (key == GLFW_KEY_W) {
-            engineP->cam.setZVel(-speed);
-        } else if (key == GLFW_KEY_A) {
-            engineP->cam.setXVel(-speed);
-        } else if (key == GLFW_KEY_S) {
-            engineP->cam.setZVel(speed);
-        } else if (key == GLFW_KEY_D) {
-            engineP->cam.setXVel(speed);
-        } else if (key == GLFW_KEY_LEFT_CONTROL) {
-            engineP->cam.setYVel(-speed);
-        } else if (key == GLFW_KEY_SPACE) {
-            engineP->cam.setYVel(speed);
-        } else if (key == GLFW_KEY_E) {
-            engineP->readMouse = !engineP->readMouse;
-            if (engineP->readMouse) {
-                glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                glfwSetCursorPos(engineP->window, engineP->settings->width/2, engineP->settings->height/2);
-            } else {
-                glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        switch (key) {
+            case GLFW_KEY_ESCAPE:
+            case GLFW_KEY_Q: {
+                glfwSetWindowShouldClose(keyWindow, GLFW_TRUE);
+                break;
+            } case GLFW_KEY_R: {
+                engineP->initPipeline();
+                break;
+            } case GLFW_KEY_W: {
+                engineP->cam.setZVel(-speed);
+                break;
+            } case GLFW_KEY_A: {
+                engineP->cam.setXVel(-speed);
+                break;
+            } case GLFW_KEY_S: {
+                engineP->cam.setZVel(speed);
+                break;
+            } case GLFW_KEY_D: { 
+                engineP->cam.setXVel(speed);
+                break;
+            } case GLFW_KEY_LEFT_CONTROL: {
+                engineP->cam.setYVel(-speed);
+                break;
+            } case GLFW_KEY_SPACE: {
+                engineP->cam.setYVel(speed);
+                break;
+            } case GLFW_KEY_E: {
+                engineP->readMouse = !engineP->readMouse;
+                if (engineP->readMouse) {
+                    glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    glfwSetCursorPos(engineP->window, engineP->settings->width/2, engineP->settings->height/2);
+                } else {
+                    glfwSetInputMode(engineP->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                }
+                break;
+            } case GLFW_KEY_H: {
+                engineP->wildcardUniformsVelocities.hlUniform = speed;
+                break;
+            } case GLFW_KEY_L: {
+                engineP->wildcardUniformsVelocities.hlUniform = -speed;
+                break;
+            } case GLFW_KEY_K: {
+                engineP->wildcardUniformsVelocities.kiUniform = speed;
+                break;
+            } case GLFW_KEY_I: {
+                engineP->wildcardUniformsVelocities.kiUniform = -speed;
+                break;
+            } case GLFW_KEY_RIGHT: {
+                engineP->wildcardUniformsVelocities.lrUniform = speed;
+                break;
+            } case GLFW_KEY_LEFT: {
+                engineP->wildcardUniformsVelocities.lrUniform = -speed;
+                break;
+            } case GLFW_KEY_UP: {
+                engineP->wildcardUniformsVelocities.udUniform = speed;
+                break;
+            } case GLFW_KEY_DOWN: {
+                engineP->wildcardUniformsVelocities.udUniform = -speed;
+                break;
+            } case GLFW_KEY_COMMA: {
+                engineP->wildcardUniformsVelocities.commaPeriodUniform = speed;
+                break;
+            } case GLFW_KEY_PERIOD: {
+                engineP->wildcardUniformsVelocities.commaPeriodUniform = -speed;
+                break;
             }
         }
     } else if (action == GLFW_RELEASE) {
-        if (key == GLFW_KEY_W || key == GLFW_KEY_S) {
-            engineP->cam.setZVel(0);
-        } else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
-            engineP->cam.setXVel(0);
-        } else if (key == GLFW_KEY_SPACE || key == GLFW_KEY_LEFT_CONTROL) {
-            engineP->cam.setYVel(0);
+        switch (key) {
+            case GLFW_KEY_W:
+            case GLFW_KEY_S:
+                engineP->cam.setZVel(0);
+                break;
+            case GLFW_KEY_A:
+            case GLFW_KEY_D:
+                engineP->cam.setXVel(0);
+                break;
+            case GLFW_KEY_SPACE:
+            case GLFW_KEY_LEFT_CONTROL:
+                engineP->cam.setYVel(0);
+                break;
+            case GLFW_KEY_H: 
+            case GLFW_KEY_L: 
+                engineP->wildcardUniformsVelocities.hlUniform = 0;
+                break;
+            case GLFW_KEY_K: 
+            case GLFW_KEY_I: 
+                engineP->wildcardUniformsVelocities.kiUniform = 0;
+                break;
+            case GLFW_KEY_RIGHT: 
+            case GLFW_KEY_LEFT: 
+                engineP->wildcardUniformsVelocities.lrUniform = 0;
+                break;
+            case GLFW_KEY_UP: 
+            case GLFW_KEY_DOWN: 
+                engineP->wildcardUniformsVelocities.udUniform = 0;
+                break;
+            case GLFW_KEY_COMMA: 
+            case GLFW_KEY_PERIOD: 
+                engineP->wildcardUniformsVelocities.commaPeriodUniform = 0;
+                break;
         }
     }
+}
+
+void Engine::scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+    Engine *engineP = &App::getInstance().engine;
+    engineP->wildcardUniforms.scrollUniform.y += yoffset;
 }
 
 void Engine::error_callback(int error, const char *description) {

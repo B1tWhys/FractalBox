@@ -7,6 +7,7 @@
 #include "Camera.hpp"
 #include "Settings.hpp"
 #include <mutex>
+#include <glm/glm.hpp>
 
 #pragma once
 
@@ -25,15 +26,32 @@ struct UniformLocations {
     int worldCamMat;
     int maxSteps;
     int minDist;
+    int hlUniform;
+    int kiUniform;
+    int lrUniform; // left/right arrows
+    int udUniform; // up/down arrows
+    int commaPeriodUniform;
+    int scrollUniform;
+    int loc2d;
 };
+
+typedef struct {
+    float hlUniform;
+    float kiUniform;
+    float lrUniform; // left/right arrows
+    float udUniform; // up/down arrows
+    float commaPeriodUniform;
+    glm::vec2 scrollUniform;
+} WildcardUniforms;
 
 class Engine {
     public:
         Settings *settings;
-
         Fractal *fractal;
-
         Engine(Settings *);
+        WildcardUniforms wildcardUniforms;
+        WildcardUniforms wildcardUniformsVelocities;
+
         void run();
     private:
         GLFWwindow *window;
@@ -57,4 +75,5 @@ class Engine {
         
         static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
         static void error_callback(int error, const char *description);
+        static void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 };

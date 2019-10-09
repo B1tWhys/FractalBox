@@ -91,10 +91,12 @@ void Camera::setZVel(float newZVel) {
 
 void Camera::stepTime() {
     vec4 wSpcVel = camToWorldMat() * vel;
-    // this->T = glm::translate(this->T, -glm::vec3(wSpcVel.x, wSpcVel.y, vel.z));
     this->T = translate(this->T, -vec3(wSpcVel));
+
     if (length(wSpcVel)) {
         vec3 camPos = getCamPos();
         printf("CamPos: (%.2f, %.2f, %.2f)\n", camPos.x, camPos.y, camPos.z);
     }
+    this->loc2d.x += vel.x;
+    this->loc2d.y -= vel.z; 
 }

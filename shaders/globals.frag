@@ -6,6 +6,13 @@ uniform mat4 camToWorldMat;
 uniform mat4 worldToCamMat;
 // uniform int maxSteps;
 // uniform float minDist;
+uniform float hlUniform;
+uniform float kiUniform;
+uniform float lrUniform; // left/right arrows
+uniform float udUniform; // up/down arrows
+uniform float commaPeriodUniform;
+uniform dvec2 loc2d;
+uniform vec2 scrollUniform;
 
 out vec4 FragColor;
 

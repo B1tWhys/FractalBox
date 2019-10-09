@@ -1,4 +1,5 @@
 #version 410 core
+#include "../shaders/globals.frag"
 
 struct MandelbrotDomain {
     double xOffset;
@@ -7,11 +8,6 @@ struct MandelbrotDomain {
     double height;
 };
 
-uniform dvec2 screenSize;
-uniform MandelbrotDomain domain;
-
-in vec4 gl_FragCoord;
-out vec4 FragColor;
 
 float f(float n, float H, float S, float L) {
     float k = n + H/30.0;
@@ -28,10 +24,16 @@ float f(float n, float H, float S, float L) {
 }
 
 void main() {
-    // double x0 = domain.width * gl_FragCoord.x / screenSize.x + domain.xOffset;
-    // double y0 = domain.height * gl_FragCoord.y / screenSize.y + domain.yOffset;
-    double x0 = 3.5 * gl_FragCoord.x / 1920 - 2.5;
-    double y0 = 2.0 * gl_FragCoord.y / 1080 - 1;
+    MandelbrotDomain domain;
+    double aspectRatio = screenSize.y / screenSize.x;
+    double scale = pow(0.5, scrollUniform.y);
+    domain.width = 2lf * scale;
+    domain.height = 2lf * scale * aspectRatio;
+    domain.xOffset = loc2d.x * 0.15lf - domain.width / 2lf;
+    domain.yOffset = loc2d.y * 0.15 - domain.height / 2;
+
+    double x0 = domain.width * gl_FragCoord.x / screenSize.x + domain.xOffset;
+    double y0 = domain.height * gl_FragCoord.y / screenSize.y + domain.yOffset;
     double x = 0.0;
     double y = 0.0;
     double xTmp = 0;
@@ -55,7 +57,7 @@ void main() {
     float ratio;
     ratio = pow(float(iteration/max_iteration), 1.0);
 
-    float H = 360.0 * ratio;
+    float H = 360.0 * pow(ratio, 2);
     float S = 1 - ratio;
     float L = ratio;
 
