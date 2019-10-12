@@ -45,5 +45,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Adds 'run' target to makefile
 add_custom_target(run
-    "${PROJECT_NAME}"
+    COMMAND "${PROJECT_NAME}"
     WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
+add_custom_target(dbg
+    COMMAND gdb ${PROJECT_NAME}
+    WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+    VERBATIM)

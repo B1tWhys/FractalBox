@@ -5,10 +5,15 @@
 #include <regex>
 
 Fractal::Fractal() {
+    //const char fragPath[] = "../shaders/mandelbulb.de";
+    //const char fragPath[] = "../shaders/sierpinskiTri.de";
+    //const char fragPath[] = "../shaders/sphere.de";
+    const char fragPath[] = "../shaders/mandelbrot.frag";
+    //const char fragPath[] = "../shaders/mandelbulb.de";
     this->name = "Mandelbrot";
     this->vertShader = this->compileFragShaderFromSrc("../shaders/triangle.vert", GL_VERTEX_SHADER);
     //this->fragShader = this->compileFragShaderFromSrc("../shaders/sphere.de", GL_FRAGMENT_SHADER);
-    this->fragShader = this->compileFragShaderFromSrc("../shaders/mandelbrot.frag", GL_FRAGMENT_SHADER);
+    this->fragShader = this->compileFragShaderFromSrc(fragPath, GL_FRAGMENT_SHADER);
 }
 
 std::string readFile(const char *fName) {

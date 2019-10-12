@@ -26,7 +26,7 @@ float f(float n, float H, float S, float L) {
 void main() {
     MandelbrotDomain domain;
     double aspectRatio = screenSize.y / screenSize.x;
-    double scale = pow(0.5, scrollUniform.y);
+    double scale = pow(.75, scrollUniform.y);
     domain.width = 2lf * scale;
     domain.height = 2lf * scale * aspectRatio;
     domain.xOffset = loc2d.x * 0.15lf - domain.width / 2lf;
@@ -53,11 +53,14 @@ void main() {
     if (iteration < max_iteration) {
         nu = log(log(float(x * x + y * y)) / 2.0f / log(2.0)) / log(2.0);
         iteration = iteration + 1 - nu;
+    } else if (iteration == max_iteration) {
+        iteration = 0;
     }
+
     float ratio;
     ratio = pow(float(iteration/max_iteration), 1.0);
 
-    float H = 360.0 * pow(ratio, 2);
+    float H = 360.0 * ratio;
     float S = 1 - ratio;
     float L = ratio;
 

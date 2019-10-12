@@ -5,6 +5,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include "App.hpp"
 
 using namespace glm;
 
@@ -54,7 +55,9 @@ void Camera::rotRight(float degrees) { // L/R rotation should be along Y in worl
     this->R = this->R * rotate(radians(degrees), vec3(0, 1, 0));
     if (degrees) {
         vec3 camForward = getCamForward();
-        printf("CamForward: (%.2f, %.2f, %.2f)\n", camForward.x, camForward.y, camForward.z);
+        //printf("CamForward: (%.2f, %.2f, %.2f)\n", camForward.x, camForward.y, camForward.z);
+        //degrees *= App::getInstance().settings.mouse_2d_sensitivity;
+        loc2d -= vec2(degrees, 0);
     }
 }
 
@@ -63,22 +66,16 @@ void Camera::rotUp(float degrees) { // U/D rotation should be along X in camera 
     if (degrees) {
         vec3 camForward = getCamForward();
         printf("CamForward: (%.2f, %.2f, %.2f)\n", camForward.x, camForward.y, camForward.z);
+        //degrees *= App::getInstance().settings.mouse_2d_sensitivity;
+        loc2d += vec2(0, degrees * .5);
     }
 }
 
 void Camera::setXVel(float newXVel) {
-    // translate world space velocity to camera space, set the x value, then translate
-    // back to world space and set it.
-    // glm::vec4 camVel = worldToCamMat() * this->vel;
-    // camVel.x = newXVel;
-    // this->vel = camToWorldMat() * camVel;
     this->vel.x = newXVel;
 }
 
 void Camera::setYVel(float newYVel) {
-    // glm::vec4 camVel = worldToCamMat() * this->vel;
-    // camVel.y = newYVel;
-    // this->vel = camToWorldMat() * camVel;
     this->vel.y = newYVel;
 }
 

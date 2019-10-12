@@ -192,7 +192,7 @@ void Engine::updateRot() {
 
 void Engine::key_callback(GLFWwindow *keyWindow, int key, int scancode, int action, int mods) {
     Engine *engineP = &App::getInstance().engine;
-    float speed = 0.1 * pow(0.5, engineP->wildcardUniforms.scrollUniform.y);
+    float speed = 0.1 * pow(0.75, engineP->wildcardUniforms.scrollUniform.y);
     if (action == GLFW_PRESS) {
         // TODO: In retrospect it would have been better if this had been a switch from the start
         switch (key) {

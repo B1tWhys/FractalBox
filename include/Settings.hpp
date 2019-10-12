@@ -12,4 +12,5 @@ struct Settings {
   float minDist = 1E-10; // smallest possible ray step
 
   float mouse_sensitivity = 1.0f/50; // lower number is slower camera movement
+  double mouse_2d_sensitivity = .25;
 };
